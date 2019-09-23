@@ -11,7 +11,19 @@
 # ファイル構成
 * ./ImageSizeChange.py
     * init
+        * 初期値設定用
     * main
+        * 実行部分
+    * FolderForLoop
+        * 指定フォルダの中をループして、取得したものをFolderCheckに投げる
+    * FolderCheck
+        * FolderForLoopから渡されたディレクトリがファイルかフォルダかを判定する
+            * フォルダなら出力先に同じフォルダを作成する
+            * ファイルならImageToGrayAndSizeChangeに投げる
+    * ImageToGrayAndSizeChange
+        * FolderCheckから渡されたファイルを変換する
+            * サイズの縮小
+            * 色表現の変更（グレースケール）
 
 # 実行方法
 * ImageSizeChange.py **変換対象のフォルダのPATH** **変換結果の出力先** 割る値
