@@ -1,22 +1,42 @@
+import numpy as np
 import sys,os,cv2,time
 
 class ImageSizeChange():
     # 入力値設定
-    def __init__(self):
+    def __init__(self,Inputlen,InputFilePath,OutputFilePath,InputVal1,InputVal2=None):
         args = sys.argv
-        self.InputFilePath = args[1]
-        self.OutputFilePath = args[2]
+        self.InputFilePath = InputFilePath
+        self.OutputFilePath = OutputFilePath
 
-        if len(args) == 4:
-            self.Bunkatsu = int(args[3])
+        self.inputlen = Inputlen
+        self.gamma = 1.5
+
+        # コマンドライン引数によって動作を変更する
+        if self.inputlen == 4:
+            self.Bunkatsu = int(InputVal1)
+        elif self.inputlen >= 5:
+            self.y = int(InputVal1)
+            self.x = int(InputVal2)
         else:
             self.Bunkatsu = 4
+        
     
     # 画像加工保存
     def ImageToGrayAndSizeChange(self,filename,filepath,InputFilePath,OutputFilePath):
             print("処理対象　　　　：" + InputFilePath + "\\" + filename)
+            lookUpTable = np.zeros((256,1), dtype=np.uint8)
+            for i in range(256):
+                lookUpTable[i][0] = 256 * (float(i)/255) ** (1.0 / self.gamma)
             gryimg = cv2.imread(filepath, 0)
-            img = cv2.resize(gryimg,(int(gryimg.shape[1] / self.Bunkatsu), int(gryimg.shape[0] / self.Bunkatsu) ))
+            gryimg = cv2.LUT(gryimg, lookUpTable)
+            
+            # コマンドライン引数によって動作変更
+            if self.inputlen == 5:
+                img = cv2.resize(gryimg,(self.y, self.x))
+            else:
+                img = cv2.resize(gryimg,(int(gryimg.shape[1] / self.Bunkatsu), int(gryimg.shape[0] / self.Bunkatsu) ))
+            
+            # 正規化
             cv2.imwrite(OutputFilePath + "\\" + "Gray_" + filename, img)
     
     # フォルダー判定
@@ -53,6 +73,12 @@ class ImageSizeChange():
 
 # 直接起動された際に実行（テスト用）
 if __name__ == "__main__":
-    env = ImageSizeChange()
+    args = sys.argv
+    inputlen = len(args)
+    if inputlen >= 5:
+        env = ImageSizeChange(inputlen,args[1],args[2],args[3],args[4])
+    else:
+        env = ImageSizeChange(inputlen,args[1],args[2],args[3])
     env.main()
+
 
